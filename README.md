@@ -1,6 +1,6 @@
 # GhostInjector
 
-proof of concept dll injector which injects without a process handle, and with a thread handle instead
+proof of concept dll injector which injects without a process handle, and with a thread handle instead. 
 with the power of Get/SetThreadContext, and some gadgets, you are able to call functions and write to another process
 
 
