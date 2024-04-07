@@ -1,4 +1,5 @@
 # GhostInjector
 
 
-[(https://github.com/li4321/GhostInjector/blob/main/2024-04-07%2016-50-35.mp4)]
+https://github.com/li4321/GhostInjector/assets/148918162/3081eb05-40fb-4c04-83c0-fd327c8cedd0
+
