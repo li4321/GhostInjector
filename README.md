@@ -21,7 +21,7 @@ https://github.com/li4321/GhostInjector/assets/148918162/b72a7d99-3fa8-4d21-8c01
 
 
 (!! there is a really weird problem in the program which I do not know how to fix, sometimes it works, sometimes it crashes)
-(for some reason, if you place a breakpoint at line 176 in ghostwrite.cpp, and then remove it and continue once hit, the problem will not occur)
+(for some reason, if you place a breakpoint at WriteQword in ghostwrite.cpp, and then remove it and continue once hit, the problem will not occur)
 ```c++
 	// mov qword ptr [rdx], rax
 	// ret
