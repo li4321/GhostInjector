@@ -1,10 +1,12 @@
 #include "injection.h"
 
 bool InjectDll(std::vector<uint8_t> fileData, uint32_t pid) {
-	PeHeader peHdr(fileData.data());
 
-	uint64_t imgSize = peHdr.ntHdr->OptionalHeader.SizeOfImage;
-	uint64_t hdrSize = peHdr.ntHdr->OptionalHeader.SizeOfHeaders;
+	//
+	// initialize pe headers
+	//
+
+	PeHeader peHdr(fileData.data());
 
 	//
 	// allocate remote buffer
@@ -12,7 +14,7 @@ bool InjectDll(std::vector<uint8_t> fileData, uint32_t pid) {
 
 	GhostWrite gw;
 	gw.Init(pid);
-	uintptr_t remoteMem = gw.Allocate(imgSize - hdrSize);
+	uintptr_t remoteMem = gw.Allocate(peHdr.ntHdr->OptionalHeader.SizeOfImage);
 
 
 	//
@@ -80,23 +82,69 @@ bool InjectDll(std::vector<uint8_t> fileData, uint32_t pid) {
 	std::printf("imports resolved\n");
 
 	//
-	// map into memory
+	// map into memory, (exclude pe headers)
 	//
 	
 	for (auto sectHdr : peHdr.sectHdrs) {
-		uintptr_t writeAddr = remoteMem + sectHdr->VirtualAddress - hdrSize;
-		uint8_t* sectStart = fileData.data() + sectHdr->PointerToRawData;
+		uint8_t*  sectStart = fileData.data() + sectHdr->PointerToRawData;
+		uintptr_t remoteSect = remoteMem + sectHdr->VirtualAddress;
 	
-		std::printf("mapping section, name: %.8s, size: %d, ---> 0x%llx\n", sectHdr->Name, sectHdr->SizeOfRawData, writeAddr);
-		gw.WriteMemory(writeAddr, std::vector<uint8_t>(sectStart, sectStart + sectHdr->SizeOfRawData));
+		std::printf("mapping section, name: %.8s, size: %d, ---> 0x%llx\n", sectHdr->Name, sectHdr->SizeOfRawData, remoteSect);
+		gw.WriteMemory(remoteSect, std::vector<uint8_t>(sectStart, sectStart + sectHdr->SizeOfRawData));
 	}
 	
-	uintptr_t remoteEntry = remoteMem + peHdr.ntHdr->OptionalHeader.AddressOfEntryPoint - hdrSize;
+	//
+	// set protections
+	//
+
+	for (auto sectHdr : peHdr.sectHdrs) {
+		uintptr_t remoteSect = remoteMem + sectHdr->VirtualAddress;
+
+		uint32_t characteristics = sectHdr->Characteristics;
+		uint32_t prot = 0;
+		std::string protStr = "";
+
+		if (characteristics & IMAGE_SCN_MEM_EXECUTE) {
+			prot = PAGE_EXECUTE;
+			protStr = "X";
+			if (characteristics & IMAGE_SCN_MEM_READ) {
+				prot = PAGE_EXECUTE_READ;
+				protStr = "RX";
+			}
+			if (characteristics & IMAGE_SCN_MEM_WRITE) {
+				prot = PAGE_EXECUTE_WRITECOPY;
+				protStr = "WCX";
+			}
+			if ((characteristics & IMAGE_SCN_MEM_READ) && (characteristics & IMAGE_SCN_MEM_WRITE)) {
+				prot = PAGE_EXECUTE_READWRITE;
+				protStr = "RWX";
+			}
+		}
+		else {
+			if (characteristics & IMAGE_SCN_MEM_READ) {
+				prot = PAGE_READONLY;
+				protStr = "RO";
+			}
+			if (characteristics & IMAGE_SCN_MEM_WRITE) {
+				prot = PAGE_WRITECOPY;
+				protStr = "WC";
+			}
+			if ((characteristics & IMAGE_SCN_MEM_READ) && (characteristics & IMAGE_SCN_MEM_WRITE)) {
+				prot = PAGE_READWRITE;
+				protStr = "RW";
+			}
+		}
+
+		std::printf("triggering NtProtectVirtualMemory (RW-->%s)\n", protStr.c_str());
+		gw.Protect(remoteSect, sectHdr->SizeOfRawData, prot);
+	}
 
 	//
 	// execute
 	//
-	
+
+	uint64_t remoteEntry = remoteMem + peHdr.ntHdr->OptionalHeader.AddressOfEntryPoint;
+
 	std::printf("triggering dll entrypoint : 0x%llx\n", remoteEntry);
 	gw.TriggerFunction(reinterpret_cast<void*>(remoteEntry), { remoteMem, DLL_PROCESS_ATTACH, 0 });
 }
