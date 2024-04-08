@@ -10,4 +10,6 @@ int main() {
 	std::cin >> dllPath;
 
 	InjectDll(FileToBytes(dllPath), pid);
+	
+	system("pause");
 }
