@@ -17,8 +17,7 @@ now 8 bytes of data has been written to the other process
 
 so now you just spam this to write large ammounts of data, and use it to push data to the stack for triggering functions
 
-
-https://github.com/li4321/GhostInjector/assets/148918162/3081eb05-40fb-4c04-83c0-fd327c8cedd0
+https://github.com/li4321/GhostInjector/assets/148918162/b72a7d99-3fa8-4d21-8c01-0149425a5865
 
 
 (!! there is a really weird problem in the program which I do not know how to fix, sometimes it works, sometimes it crashes)
