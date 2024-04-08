@@ -58,6 +58,7 @@ public:
 	bool Init(uint32_t pid);
 
 	uintptr_t Allocate(uint64_t size);
+	bool Protect(uintptr_t addr, uint64_t size, uint32_t protect);
 	void LoadLib(std::string name);
 	void WriteMemory(uintptr_t addr, std::vector<uint8_t> data);
 
