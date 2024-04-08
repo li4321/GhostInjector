@@ -63,16 +63,31 @@ uintptr_t GhostWrite::Allocate(uint64_t size) {
 
 	ctx.Rsp = jmp0StackAddr - 0x400;
 	uintptr_t remoteMem = Push(&ctx, 0);
-	uintptr_t memSize   = Push(&ctx, size);
+	uintptr_t memSize = Push(&ctx, size);
 
-	std::printf("triggering NtAllocateVirtualMemory\n");
-	if (NT_ERROR(TriggerFunction(NtAllocateVirtualMemory, { static_cast<uintptr_t>(-1), remoteMem, 0, memSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE })))
-		return false;
+	std::printf("triggering NtAllocateVirtualMemory, (RW)\n");
+	if (NT_ERROR(TriggerFunction(NtAllocateVirtualMemory, { static_cast<uintptr_t>(-1), remoteMem, 0, memSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE })))
+		return 0;
 
 	remoteMem = ReadQword(remoteMem);
 	std::printf("allocated memory at: 0x%llx\n", remoteMem);
 
 	return remoteMem;
+}
+
+bool GhostWrite::Protect(uintptr_t addr, uint64_t size, uint32_t protect) {
+	CONTEXT ctx = {};
+	thread.GetContext(&ctx, CONTEXT_FULL);
+
+	ctx.Rsp = jmp0StackAddr - 0x400;
+	uintptr_t remoteMem = Push(&ctx, addr);
+	uintptr_t memSize = Push(&ctx, size);
+	uintptr_t oldProtect = Push(&ctx, 0);
+	
+	if (NT_ERROR(TriggerFunction(NtProtectVirtualMemory, { static_cast<uintptr_t>(-1), remoteMem, memSize, protect, oldProtect})))
+		return false;
+
+	return true;
 }
 
 void GhostWrite::LoadLib(std::string name) {
