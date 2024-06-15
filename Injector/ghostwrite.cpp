@@ -180,15 +180,21 @@ void GhostWrite::WaitForAutoLock(CONTEXT* ctx) {
 	}
 }
 
+int times = 0;
 void GhostWrite::WriteQword(uintptr_t addr, uint64_t value) {
 	CONTEXT ctx = {};
 	thread.GetContext(&ctx, CONTEXT_FULL);
+
+	if (times < 3) {
+		Sleep(1000);
+		times++;
+	}
 
 	// mov qword ptr [rdx], rax
 	// ret
 	ctx.Rdx = addr;
 	ctx.Rax = value;
-	ctx.Rip = writeGadgetAddr;		// IF IT CRASHES, TRY PLACING A BREAKPOINT HERE, AND THEN REMOVE IT AND CONTINUE, IDK HOW TO FIX THIS ITS WEIRD
+	ctx.Rip = writeGadgetAddr;
 	ctx.Rsp = jmp0StackAddr; // jmp 0 --> infinite loop
 
 	assert(ctx.Rax == value && ctx.Rdx == addr);
