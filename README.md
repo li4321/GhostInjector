@@ -20,18 +20,6 @@ so now you just spam this to write large ammounts of data, and use it to push da
 https://github.com/li4321/GhostInjector/assets/148918162/b72a7d99-3fa8-4d21-8c01-0149425a5865
 
 
-(!! there is a really weird problem in the program which I do not know how to fix, sometimes it works, sometimes it crashes)
-(for some reason, if you place a breakpoint at WriteQword in ghostwrite.cpp, and then remove it and continue once hit, the problem will not occur)
-```c++
-	// mov qword ptr [rdx], rax
-	// ret
-	ctx.Rdx = addr;
-	ctx.Rax = value;
-	ctx.Rip = writeGadgetAddr;		// <-- place breakpoint here
-	ctx.Rsp = jmp0StackAddr; // jmp 0 --> infinite loop
-```
-
-
 resources which made this possible:
 https://github.com/c0de90e7/GhostWriting/blob/master/gw_ng.c
 https://blog.sevagas.com/IMG/pdf/code_injection_series_part5.pdf
