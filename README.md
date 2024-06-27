@@ -1,8 +1,8 @@
 # NOTICE:
 
-windows has updated SetThreadContext function, where rcx, rdx, r8, r9, cannot be set anymore. so this will not work. I will probably release a newer repo getting around this in the future.
+on some computers, SetThreadContext may be weird and rcx, rdx, r8. r9 may not be able to be set. this occured for me.
+I might possibly consider releasing a update/another repo getting pass this.
 
-https://github.com/mic101/windows/blob/master/WRK-v1.2/base/ntos/ps/amd64/psctxamd64.c#L498-L517
 
 # GhostInjector
 
