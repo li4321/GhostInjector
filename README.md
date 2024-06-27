@@ -1,3 +1,9 @@
+# NOTICE:
+
+windows has updated SetThreadContext function, where rcx, rdx, r8, r9, cannot be set anymore. so this will not work. I will probably release a newer repo getting around this in the future.
+
+https://github.com/mic101/windows/blob/master/WRK-v1.2/base/ntos/ps/amd64/psctxamd64.c#L498-L517
+
 # GhostInjector
 
 proof of concept dll injector which injects without a process handle, and with a thread handle instead. 
