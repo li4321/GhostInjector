@@ -1,9 +1,3 @@
-# NOTICE:
-
-on some computers, SetThreadContext may be weird and rcx, rdx, r8. r9 may not be able to be set. this occured for me.
-I might possibly consider releasing a update/another repo getting pass this.
-
-
 # GhostInjector
 
 proof of concept dll injector which injects without a process handle, and with a thread handle instead. 
